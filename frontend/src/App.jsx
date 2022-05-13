@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { gql, useMutation } from "@apollo/client";
+import { gql, useMutation, useQuery } from "@apollo/client";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Paper from "@mui/material/Paper";
@@ -13,6 +13,15 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
+
+const getEventsQuery = gql`
+  query {
+    events {
+      name
+      createdOn
+    }
+  }
+`;
 
 const createEventMutation = gql`
   mutation createdEvent($name: String!) {
@@ -28,6 +37,14 @@ export const App = () => {
     value: "",
     events: [],
   });
+
+  const { loading: queryLoading, data: queryData } = useQuery(getEventsQuery);
+  useEffect(() => {
+    if (!queryLoading && queryData) {
+      const { events } = queryData;
+      setState(prevState => ({ ...prevState, events: [...prevState.events, ...events]}))
+    }
+  }, [queryLoading, queryData]);
 
   const [createEvent, { loading: mutationLoading, data: mutationData }] = useMutation(createEventMutation);
   useEffect(() => {

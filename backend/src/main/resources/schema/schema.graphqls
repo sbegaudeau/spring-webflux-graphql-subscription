@@ -1,0 +1,18 @@
+type Query {
+  events: [Event!]!
+}
+
+type Mutation {
+  createEvent(name: String!): Event!
+}
+
+type Subscription {
+  events: Event!
+}
+
+type Event {
+  name: String!
+  createdOn: DateTime!
+}
+
+scalar DateTime

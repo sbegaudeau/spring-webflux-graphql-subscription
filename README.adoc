@@ -1,0 +1,16 @@
+= spring-webflux-graphql-subscription
+
+== Backend
+
+A regular Spring Webflux web server providing a simple GraphQL API.
+In order to build the backend, use `mvn clean verify -f backend/pom.xml`
+
+To start the server, use `java -jar backend/target/backend-0.0.1-SNAPSHOT.jar`.
+
+== Frontend
+
+In order to start the frontend, use the following commands:
+
+- `cd frontend`
+- `npm ci`
+- `npm run dev`

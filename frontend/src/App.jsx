@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { gql, useMutation, useQuery } from "@apollo/client";
+import { useState } from "react";
+import { gql, useMutation, useSubscription } from "@apollo/client";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Paper from "@mui/material/Paper";
@@ -14,18 +14,18 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 
-const getEventsQuery = gql`
-  query {
-    events {
+const createEventMutation = gql`
+  mutation createdEvent($name: String!) {
+    createEvent(name: $name) {
       name
       createdOn
     }
   }
 `;
 
-const createEventMutation = gql`
-  mutation createdEvent($name: String!) {
-    createEvent(name: $name) {
+const eventsSubscription = gql`
+  subscription {
+    events {
       name
       createdOn
     }
@@ -38,21 +38,19 @@ export const App = () => {
     events: [],
   });
 
-  const { loading: queryLoading, data: queryData } = useQuery(getEventsQuery);
-  useEffect(() => {
-    if (!queryLoading && queryData) {
-      const { events } = queryData;
-      setState(prevState => ({ ...prevState, events: [...prevState.events, ...events]}))
-    }
-  }, [queryLoading, queryData]);
-
-  const [createEvent, { loading: mutationLoading, data: mutationData }] = useMutation(createEventMutation);
-  useEffect(() => {
-    if (!mutationLoading && mutationData) {
-      const { createEvent } = mutationData;
-      setState(prevState => ({ ...prevState, events: [...prevState.events, createEvent]}))
-    }
-  }, [mutationLoading, mutationData]);
+  const [createEvent, { loading: createEventLoading }] =
+    useMutation(createEventMutation);
+  useSubscription(eventsSubscription, {
+    onSubscriptionData: ({ subscriptionData }) => {
+      const {
+        data: { events },
+      } = subscriptionData;
+      setState((prevState) => ({
+        ...prevState,
+        events: [...prevState.events, events],
+      }));
+    },
+  });
 
   const handleChange = (event) => {
     const {
@@ -102,7 +100,7 @@ export const App = () => {
             />
             <Button
               onClick={handleClick}
-              disabled={state.value.length === 0 || mutationLoading}
+              disabled={state.value.length === 0 || createEventLoading}
               size="small"
               variant="contained"
             >
